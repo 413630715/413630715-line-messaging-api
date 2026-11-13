@@ -1,0 +1,136 @@
+% !TEX program = xelatex
+\documentclass[a4paper,12pt]{report}
+
+\usepackage{fontspec}
+\usepackage{xeCJK}
+\IfFontExistsTF{Microsoft JhengHei}{\setCJKmainfont{Microsoft JhengHei}}{\setCJKmainfont{Noto Sans CJK TC}}
+\IfFontExistsTF{Microsoft JhengHei}{\setCJKsansfont{Microsoft JhengHei}}{\setCJKsansfont{Noto Sans CJK TC}}
+\IfFontExistsTF{Microsoft JhengHei}{\setCJKmonofont{Microsoft JhengHei}}{\setCJKmonofont{Noto Sans CJK TC}}
+\setmainfont{Times New Roman}
+\XeTeXlinebreaklocale "zh"
+\XeTeXlinebreakskip = 0pt plus 1pt
+
+\usepackage[a4paper,margin=2.5cm]{geometry}
+\usepackage{array}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{enumitem}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{caption}
+\usepackage{fancyhdr}
+\usepackage{hyperref}
+\usepackage{titlesec}
+\usepackage{float}
+
+\definecolor{linegreen}{HTML}{06C755}
+\definecolor{codebackground}{HTML}{F4F6F8}
+\definecolor{codekeyword}{HTML}{005CC5}
+\definecolor{codestring}{HTML}{A31515}
+\definecolor{codecomment}{HTML}{687078}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=linegreen,
+    urlcolor=blue,
+    pdftitle={LINE Messaging API 註冊與應用教學文件},
+    pdfauthor={413630715 王品翔}
+}
+
+\lstdefinestyle{pythonstyle}{
+    language=Python,
+    backgroundcolor=\color{codebackground},
+    basicstyle=\ttfamily\small,
+    keywordstyle=\color{codekeyword}\bfseries,
+    stringstyle=\color{codestring},
+    commentstyle=\color{codecomment}\itshape,
+    numbers=left,
+    numberstyle=\tiny\color{gray},
+    numbersep=8pt,
+    frame=single,
+    rulecolor=\color{gray!45},
+    breaklines=true,
+    showstringspaces=false,
+    tabsize=4,
+    columns=fullflexible,
+    keepspaces=true
+}
+\lstset{style=pythonstyle}
+
+\renewcommand{\contentsname}{目錄}
+\renewcommand{\listfigurename}{圖目錄}
+\renewcommand{\listtablename}{表目錄}
+\renewcommand{\lstlistlistingname}{程式碼目錄}
+\renewcommand{\figurename}{圖}
+\renewcommand{\tablename}{表}
+\renewcommand{\chaptername}{第}
+\renewcommand{\thechapter}{\arabic{chapter}章}
+\renewcommand{\thesection}{\arabic{chapter}.\arabic{section}}
+\renewcommand{\thesubsection}{\thesection.\arabic{subsection}}
+\renewcommand{\lstlistingname}{程式碼}
+\setcounter{tocdepth}{2}
+\setcounter{secnumdepth}{3}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{LINE Messaging API 教學文件}
+\fancyhead[R]{413630715 王品翔}
+\fancyfoot[C]{\thepage}
+\setlength{\headheight}{15pt}
+
+\titleformat{\chapter}[display]
+  {\bfseries\Huge\centering}
+  {第 \thechapter 章}
+  {0.5em}
+  {}
+
+\title{LINE Messaging API\\註冊與應用教學文件}
+\author{學號：413630715\\姓名：王品翔}
+\date{2026 年 11 月 13 日}
+
+\begin{document}
+
+\begin{titlepage}
+    \centering
+    \vspace*{2cm}
+    {\Huge\bfseries 專業排版與設計 期中作業\par}
+    \vspace{1.5cm}
+    {\LARGE\bfseries LINE Messaging API\par}
+    \vspace{0.4cm}
+    {\LARGE 註冊與應用教學文件\par}
+    \vfill
+    \begin{tabular}{rl}
+        座號： & \\ [0.5cm]
+        班級： & \\ [0.5cm]
+        學號： & 413630715 \\ [0.5cm]
+        姓名： & 王品翔 \\
+    \end{tabular}
+    \vfill
+    {\large 2026 年 11 月 13 日\par}
+\end{titlepage}
+
+\pagenumbering{roman}
+\chapter*{摘要}
+本文件以 LINE Messaging API 為主題，說明如何從 LINE Developers 帳號申請開始，建立 Provider 與 Messaging API Channel，取得 Channel Secret 和 Channel access token，最後使用 Python Flask 建立可接收與回覆訊息的 Webhook 伺服器。文件同時整理環境變數、公開 HTTPS 網址、Webhook 驗證、除錯方法與安全注意事項，讓讀者能循序完成一個最小可運作的 Echo Bot。
+
+\noindent\textbf{關鍵字：} LINE Messaging API、Webhook、Flask、Python、Access Token
+\clearpage
+
+\tableofcontents
+\clearpage
+\listoffigures
+\clearpage
+\listoftables
+\clearpage
+\lstlistoflistings
+\clearpage
+
+\pagenumbering{arabic}
+\input{chap1/chap1.tex}
+\input{chap2/chap2.tex}
+\input{chap3/chap3.tex}
+\input{chap4/chap4.tex}
+\input{chap5/chap5.tex}
+
+\end{document}
