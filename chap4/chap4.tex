@@ -1,0 +1,74 @@
+\chapter{Echo Bot 程式實作與測試}
+
+\section{程式架構}
+程式由四個步驟組成。第一步使用 \texttt{load\_dotenv()} 讀取本機環境變數；第二步建立 Flask 應用程式與 LINE SDK 的 Handler；第三步在 \texttt{/callback} 接收 POST 請求並交給 Handler 驗證簽章；第四步以裝飾器註冊文字訊息事件，建立回覆物件並呼叫 Messaging API。
+
+\section{Webhook 端點}
+\texttt{callback()} 先讀取 \texttt{X-Line-Signature} 標頭與原始請求內容。這裡必須使用 \texttt{request.get\_data(as\_text=True)} 取得未修改的 body，因為 SDK 需要以原始內容計算 HMAC 簽章。若簽章不正確，\texttt{InvalidSignatureError} 會被捕捉並回傳 HTTP 400；驗證成功後則回傳 \texttt{OK}。
+
+這個檢查很重要。若直接相信外部傳入的 JSON，而沒有驗證簽章，任何人都可能偽造 LINE 事件，讓伺服器執行不應執行的操作。正式系統還應加入日誌、速率限制、錯誤追蹤與健康檢查。
+
+\section{文字事件與回覆}
+\texttt{@handler.add(MessageEvent, message=TextMessageContent)} 只接收文字訊息事件，因此圖片或貼圖事件不會進入這個函式。進入 \texttt{handle\_message()} 後，程式使用事件中的 \texttt{reply\_token} 建立 \texttt{ReplyMessageRequest}，並將 \texttt{event.message.text} 放進 \texttt{TextMessage}。最後呼叫 \texttt{reply\_message\_with\_http\_info()} 將訊息送回 LINE。
+
+\begin{lstlisting}[caption={Python Echo Bot 核心程式},label={lst:app-core}]
+from flask import Flask, abort, request
+from dotenv import load_dotenv
+from linebot.v3 import WebhookHandler
+from linebot.v3.exceptions import InvalidSignatureError
+from linebot.v3.messaging import (
+    ApiClient, Configuration, MessagingApi,
+    ReplyMessageRequest, TextMessage,
+)
+from linebot.v3.webhooks import MessageEvent, TextMessageContent
+import os
+
+load_dotenv()
+app = Flask(__name__)
+channel_secret = os.getenv("LINE_CHANNEL_SECRET")
+access_token = os.getenv("LINE_CHANNEL_ACCESS_TOKEN")
+configuration = Configuration(access_token=access_token)
+handler = WebhookHandler(channel_secret)
+
+@app.route("/callback", methods=["POST"])
+def callback():
+    signature = request.headers.get("X-Line-Signature", "")
+    body = request.get_data(as_text=True)
+    try:
+        handler.handle(body, signature)
+    except InvalidSignatureError:
+        abort(400)
+    return "OK"
+
+@handler.add(MessageEvent, message=TextMessageContent)
+def handle_message(event):
+    with ApiClient(configuration) as api_client:
+        messaging_api = MessagingApi(api_client)
+        reply = ReplyMessageRequest(
+            reply_token=event.reply_token,
+            messages=[TextMessage(text=event.message.text)],
+        )
+        messaging_api.reply_message_with_http_info(reply)
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=8000, debug=True)
+\end{lstlisting}
+
+\section{執行與測試}
+設定 `.env` 後，在虛擬環境執行 `python app.py`。先使用瀏覽器或 `curl` 確認服務可以啟動，再透過 ngrok 建立公開網址。回到 LINE Developers Console 按 Verify，最後在 LINE App 傳送「測試」，若收到相同文字，即表示事件解析、簽章驗證與回覆呼叫都完成。
+
+\begin{table}[H]
+    \centering
+    \caption{常見問題與排查方向}
+    \label{tab:troubleshooting}
+    \begin{tabular}{p{0.28\textwidth}p{0.58\textwidth}}
+        \toprule
+        現象 & 排查方向 \\
+        \midrule
+        Verify 失敗 & 確認 ngrok 正在執行、URL 含 `/callback`，並檢查 Flask port。 \\
+        回傳 400 & Channel Secret 不一致，或請求內容被中介軟體修改。 \\
+        收到事件但無回覆 & 檢查 Access Token、reply token 是否有效，以及 SDK 例外訊息。 \\
+        沒有任何事件 & 開啟 Use webhook，確認 Bot 已加入好友且使用正確 Channel。 \\
+        \bottomrule
+    \end{tabular}
+\end{table}

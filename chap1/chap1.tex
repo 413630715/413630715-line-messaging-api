@@ -1,0 +1,46 @@
+\chapter{LINE Messaging API 與系統概念}
+
+\section{LINE Messaging API 簡介}
+LINE Messaging API 是 LINE 提供給開發者的訊息整合介面。開發者可以建立官方帳號的後端服務，接收使用者傳送的事件，並透過 API 回覆或主動推播訊息。它的核心價值在於把熟悉的聊天介面與自動化服務連接起來，使用者不需要另外安裝應用程式就能使用功能。
+
+本作業實作的是 Echo Bot。使用者在 LINE 聊天室輸入文字後，LINE 平台會將事件以 HTTP POST 傳送到伺服器的 Webhook URL；Flask 解析請求並交由 SDK 驗證簽章，再以 reply token 回傳相同文字。這個例子雖然簡單，卻涵蓋正式機器人的重要基礎：認證、事件路由、回覆期限與伺服器部署。
+
+\section{常見應用場景}
+\begin{itemize}[leftmargin=2.5em]
+    \item \textbf{客服與 FAQ：}將常見問題整理成關鍵字或意圖，提供即時回答。
+    \item \textbf{通知與提醒：}透過 Push Message 傳送訂單狀態、課程提醒或系統告警。
+    \item \textbf{活動與會員服務：}利用 Rich Menu 導向報名、查詢與會員功能。
+    \item \textbf{資料查詢：}將資料庫、校務系統或其他 API 包裝成聊天操作。
+\end{itemize}
+
+\section{訊息流程與元件角色}
+系統可以分成 LINE 使用者、LINE Platform、公開 Webhook 伺服器與 Messaging API 四個部分。使用者訊息先抵達 LINE Platform，平台建立事件 JSON 並送到 Webhook；伺服器驗證 \texttt{X-Line-Signature} 後，再使用 reply token 呼叫回覆 API。
+
+\begin{figure}[H]
+    \centering
+    \fbox{\parbox{0.88\textwidth}{\centering
+    使用者\quad $\longrightarrow$\quad LINE Platform\quad $\longrightarrow$\quad Flask Webhook\\[0.4cm]
+    \hfill $\longleftarrow$ 回覆訊息 $\longleftarrow$\hfill}}
+    \caption{LINE Echo Bot 的訊息往返流程}
+    \label{fig:message-flow}
+\end{figure}
+
+\begin{table}[H]
+    \centering
+    \caption{主要元件與責任}
+    \label{tab:components}
+    \begin{tabular}{p{0.25\textwidth}p{0.62\textwidth}}
+        \toprule
+        元件 & 責任 \\
+        \midrule
+        LINE Platform & 管理使用者訊息、事件轉送與 Channel 認證。 \\
+        Webhook URL & 提供公開 HTTPS POST 端點，接收事件資料。 \\
+        Channel Secret & 用來驗證請求簽章，防止偽造事件。 \\
+        Access Token & 伺服器呼叫 Messaging API 時使用的授權憑證。 \\
+        Flask 應用程式 & 接收請求、交給 Handler 分派，並呼叫回覆 API。 \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\section{本文件的實作範圍}
+本文件採用 Python 3、Flask、\texttt{line-bot-sdk} 第三版與 \texttt{python-dotenv}。實作範圍先聚焦在文字訊息回覆，藉此說明最重要的設定與驗證步驟；圖片訊息、Rich Menu 和資料庫可以在這個基礎上延伸。

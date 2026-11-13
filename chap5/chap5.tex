@@ -1,0 +1,25 @@
+\chapter{本文件 LaTeX 原始碼}
+
+本章列出本文件的主要 LaTeX 原始碼與實作程式，方便檢查文件結構、套件設定及程式碼行號。\texttt{lstinputlisting} 會直接讀取工作目錄中的來源檔案，因此報告內容與實際檔案保持一致。
+
+\section{主文件 main.tex}
+\lstinputlisting[caption={主文件 main.tex 原始碼},label={lst:main-source}]{main.tex}
+
+\section{LINE Bot 程式 app.py}
+\lstinputlisting[caption={LINE Bot app.py 完整原始碼},label={lst:app-source}]{app.py}
+
+\section{章節檔案}
+以下列出第一章的章節來源，其他章節採相同的拆分方式，讓長篇文件易於維護。
+\lstinputlisting[caption={第一章 chap1.tex 原始碼},label={lst:chap1-source}]{chap1/chap1.tex}
+
+\section{原始碼維護方式}
+主檔案只負責套件、格式與章節順序，各章內容放在獨立的 `.tex` 檔案中。這種結構能讓作者在修改單一章節時降低誤刪其他內容的風險，也方便多人協作與 Git 版本比較。編譯時只要在 `main.tex` 所在目錄執行 XeLaTeX，即可重新產生目錄、圖目錄、表目錄與程式碼目錄。
+
+\chapter*{結論}
+本文件完成了 LINE Messaging API 的基本註冊、Channel 建立、憑證設定、Webhook 公開與 Python Echo Bot 實作。透過 Channel Secret 驗證請求、Access Token 呼叫回覆 API，以及環境變數管理機密資料，可以建立一個具備基本安全性的聊天機器人。後續可加入資料庫、Push Message、Rich Menu、Flex Message 與正式雲端部署，將範例擴充為完整服務。
+
+\begin{thebibliography}{9}
+\bibitem{line-docs} LINE Developers，\textit{Messaging API Documentation}，\url{https://developers.line.biz/en/docs/messaging-api/}。
+\bibitem{flask-docs} Pallets Projects，\textit{Flask Documentation}，\url{https://flask.palletsprojects.com/}。
+\bibitem{python-dotenv} python-dotenv，\textit{Project Documentation}，\url{https://pypi.org/project/python-dotenv/}。
+\end{thebibliography}

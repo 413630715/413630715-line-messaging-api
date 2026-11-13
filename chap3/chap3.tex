@@ -1,0 +1,42 @@
+\chapter{憑證、Webhook 與本機環境設定}
+
+\section{Channel Secret 與 Access Token}
+在 Channel 的 Basic settings 可以找到 Channel secret。它是用於驗證 LINE Platform 請求來源的秘密字串，不能放在公開版本庫或直接寫進程式碼。Access token 則位於 Messaging API 分頁，通常要按下 Issue 或重新發行按鈕取得。Token 具有呼叫 API 的權限，同樣必須視為機密資料。
+
+兩者用途不同：Channel Secret 用來檢查收到的 Webhook 請求是否被竄改；Channel access token 用來授權伺服器呼叫回覆訊息 API。若任一憑證外洩，應立即在 Console 重新發行或撤銷，並同步更新部署環境。
+
+\section{Python 套件與環境變數}
+在專案目錄建立虛擬環境並安裝套件：
+\begin{lstlisting}[language=bash,caption={建立 Python 虛擬環境與安裝套件},label={lst:install}]
+python -m venv .venv
+.venv\\Scripts\\activate
+python -m pip install flask line-bot-sdk python-dotenv
+\end{lstlisting}
+
+在同一個目錄建立 `.env`，內容如下。等號右側填入 LINE Developers Console 取得的實際值，檔案不可提交到 GitHub。
+\begin{lstlisting}[caption={.env 憑證設定範例},label={lst:env}]
+LINE_CHANNEL_SECRET=replace-with-channel-secret
+LINE_CHANNEL_ACCESS_TOKEN=replace-with-channel-access-token
+\end{lstlisting}
+
+建議另外建立 `.gitignore`，至少排除 `.env`、`.venv/`、\texttt{\_\_pycache\_/} 與編譯產物，避免秘密資料和暫存檔被上傳。
+
+\section{Webhook URL 與 HTTPS}
+LINE Platform 必須能從網際網路連線到 Webhook URL，因此 `http://localhost:8000/callback` 不能直接填入 Console。開發階段可用 ngrok 將本機的 8000 port 暫時公開：
+\begin{lstlisting}[language=bash,caption={使用 ngrok 暫時公開本機服務},label={lst:ngrok}]
+python app.py
+ngrok http 8000
+\end{lstlisting}
+
+ngrok 會產生一個 HTTPS 網址，例如 `https://example.ngrok-free.app`。在 Messaging API 的 Webhook settings 填入 `https://example.ngrok-free.app/callback`，儲存後按 Verify。測試期間若 ngrok 網址改變，Webhook URL 也必須同步更新。
+
+正式環境則應使用具備固定網域和 TLS 憑證的雲端服務或伺服器。無論使用哪種部署方式，URL 都應使用 HTTPS，並只開放必要的 POST 路由。
+
+\section{Webhook 設定檢查清單}
+\begin{enumerate}[leftmargin=3em]
+    \item Flask 程式已啟動，且主機的 8000 port 可以接受請求。
+    \item Public URL 後方包含正確的 `/callback` 路徑。
+    \item LINE Console 的 Use webhook 已開啟。
+    \item Verify 測試成功，伺服器回覆 HTTP 200。
+    \item LINE App 已將 Bot 加入好友，且沒有關閉自動回覆造成衝突。
+\end{enumerate}

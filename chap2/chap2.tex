@@ -1,0 +1,39 @@
+\chapter{LINE Developers 註冊與 Channel 建立}
+
+\section{建立 LINE Developers 帳號}
+首先使用瀏覽器進入 LINE Developers Console，使用 LINE 帳號登入。第一次登入時須同意開發者服務的使用條款，並填寫顯示名稱、電子郵件等基本資料。登入成功後會進入 Console 首頁；若帳號尚未建立 Provider，畫面會提供建立 Provider 的入口。
+
+\begin{enumerate}[leftmargin=3em]
+    \item 開啟 LINE Developers Console，選擇以 LINE 帳號登入。
+    \item 閱讀並同意開發者服務條款，完成必要的帳號資料。
+    \item 在 Console 選擇 \textbf{Create a new provider}。
+    \item 輸入 Provider 名稱，例如「413630715 LINE Bot」，確認建立。
+\end{enumerate}
+
+Provider 可以視為一個專案或服務擁有者。同一個 Provider 底下可以放置不同用途的 Channel，例如測試機器人、正式機器人或 LIFF 應用程式。命名時建議加入課程、專案或環境資訊，以免日後混淆。
+
+\section{建立 Messaging API Channel}
+進入剛建立的 Provider 後，選擇建立新的 Channel，類型選擇 \textbf{Messaging API}。依序填寫 Channel name、Channel description、Category、Subcategory 與電子郵件等欄位。送出後，Console 會建立一個可管理的 Messaging API Channel，並顯示 Basic settings 與 Messaging API 分頁。
+
+\begin{table}[H]
+    \centering
+    \caption{建立 Channel 時的欄位用途}
+    \label{tab:channel-fields}
+    \begin{tabular}{p{0.28\textwidth}p{0.58\textwidth}}
+        \toprule
+        欄位 & 建議填寫方式 \\
+        \midrule
+        Channel name & 使用能辨識環境的名稱，例如 413630715 Echo Bot。 \\
+        Description & 說明這個 Channel 的用途與測試範圍。 \\
+        Category & 選擇最接近實際服務的類別。 \\
+        Subcategory & 依照機器人功能選擇細分類別。 \\
+        Email & 填寫可收信的聯絡信箱，供平台通知使用。 \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\section{取得 QR Code 與加入好友}
+在 Messaging API 分頁可以看到 Bot basic ID、QR code 與加入好友相關設定。使用 LINE App 掃描 QR Code 後，即可將機器人加入好友。此時可以先加入好友，但在 Webhook 伺服器尚未啟動前，機器人還不能正確回覆訊息。
+
+\section{申請流程中的注意事項}
+Channel 的名稱和描述是管理資訊，不等於使用者看到的所有內容；真正顯示在聊天清單的名稱與圖片，還需要在相關帳號設定中另外調整。建立完成後應確認目前操作的 Provider 和 Channel 正確，避免把測試用的 Token 放到正式環境。
